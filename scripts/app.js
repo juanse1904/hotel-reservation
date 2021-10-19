@@ -16,19 +16,30 @@ function Hero(props){
       </section>
     )
 }
-function DateFilter(props){
-    let dateValue=props.date.toLocaleDateString().split("/").join("/")
-    console.log("date input value", dateValue)
-    return(
-        <div className="field">
-        <div className="control has-icons-left">
-          <input className="input" type="date" value={`${dateValue}`} />
-          <span className="icon is-small is-left">
-            <i className={`fas ${props.icon}`}></i>
-          </span>
-        </div>
-      </div>  
-    )
+class DateFilter extends React.Component {
+
+    constructor(props) {
+        super(props)
+        this.handleDateChange = this.handleDateChange.bind(this)
+      }
+    
+      handleDateChange(event) {
+        this.props.onDateChange(event)
+      }
+    
+    render(){
+        return(
+            <div className="field">
+            <div className="control has-icons-left">
+            <input className="input" type="date" onChange={ this.handleDateChange } value={ date } name={ this.props.name } />
+              <span className="icon is-small is-left">
+                <i className={`fas ${props.icon}`}></i>
+              </span>
+            </div>
+          </div>  
+        )
+
+    }
 }
 function OptionsFilter(props){
     return(
@@ -48,7 +59,14 @@ function OptionsFilter(props){
       </div> 
     )
 }
-function Filters(props){
+class Filters extends React.Component{
+
+    constructor(props) {
+        super(props)
+        this.handleDateChange = this.handleDateChange.bind(this)
+      }
+    
+render(){
     return(
         <nav className="navbar is-info" style={ {justifyContent: 'center'} }>
   <div className="navbar-item">
@@ -80,23 +98,39 @@ function Filters(props){
       icon="fa-bed" />
   </div>
 </nav>
-    )
+)
+}
 }
 
-function App() {
-    const filters = {
-        dateFrom: today, // Proviene del archivo data.js
-        dateTo: new Date(today.valueOf() + 86400000),
-        country: '',
-        price: 0,
-        rooms: 0
+class App extends React.Component {
+    constructor(props){
+        super(props)
+        
+        this.state = {
+            filters:{
+            dateFrom: today, // Proviene del archivo data.js
+            dateTo: new Date(today.valueOf() + 86400000),
+            country: '',
+            price: 0,
+            rooms: 0
+            }
+        }
+
+        this.handleDateChange = this.handleDateChange.bind(this)
+    }
+
+    handleDateChange(event) {
+        let payload = this.props.filters
+        payload[event.target.name] = event.target.value
       }
-    return (
-        <div>
-            <Hero filters={filters} />
-            <Filters filters={filters} />
-        </div>
-    )
+    render(){
+        return (
+            <div>
+                <Hero filters={this.state.filters} />
+                <Filters filters={this.state.filters} />
+            </div>
+        )
+    }
   }
   
   ReactDOM.render(<App />, document.getElementById('app'))
