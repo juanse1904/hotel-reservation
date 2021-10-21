@@ -31,9 +31,9 @@ class DateFilter extends React.Component {
         return(
             <div className="field">
             <div className="control has-icons-left">
-            <input className="input" type="date" onChange={ this.handleDateChange } value={ date } name={ this.props.name } />
+            <input className="input" type="date" onChange={ this.handleDateChange } value={ this.props.date } name={ this.props.name } />
               <span className="icon is-small is-left">
-                <i className={`fas ${props.icon}`}></i>
+                <i className={`fas ${this.props.icon}`}></i>
               </span>
             </div>
           </div>  
@@ -41,60 +41,95 @@ class DateFilter extends React.Component {
 
     }
 }
-function OptionsFilter(props){
+class OptionsFilter extends React.Component{
+  constructor(props) {
+    super(props)
+    this.handleOptionChange = this.handleOptionChange.bind(this)
+  }
+
+  handleOptionChange(event) {
+    this.props.onOptionChange(event)
+  }
+  render(){
     return(
-        <div className="field">
-        <div className="control has-icons-left">
-          <div className="select" style={ {width: '100%'} }>
-            <select style={ {width: '100%'} }>
-              {props.options.map((item)=>
-              <option value={item.name}>{item.name}</option>
-              )}
-            </select>
+          <div className="field">
+          <div className="control has-icons-left">
+            <div className="select" style={ {width: '100%'} }>
+              <select name={this.props.name} onClick={this.handleOptionChange} style={ {width: '100%'} }>
+                {this.props.options.map((item,index)=>
+                <option  key={index} value={item.value}>{item.name}</option>
+                )}
+              </select>
+            </div>
+            <div className="icon is-small is-left">
+              <i className={`fas ${this.props.icon}`}></i>
+            </div>
           </div>
-          <div className="icon is-small is-left">
-            <i className={`fas ${props.icon}`}></i>
-          </div>
-        </div>
-      </div> 
-    )
+        </div> 
+      )
+  }
 }
 class Filters extends React.Component{
 
     constructor(props) {
-        super(props)
-        this.handleDateChange = this.handleDateChange.bind(this)
+    super(props)
+    this.handleOptionChange=this.handleOptionChange.bind(this)
+    this.handleDateChange=this.handleDateChange.bind(this)
       }
-    
+
+      handleOptionChange(event) {
+        let payload = this.props.filters
+        payload[event.target.name] = event.target.value
+        this.props.onFilterChange(payload)
+      }
+
+      handleDateChange(event) {
+        let payload = this.props.filters
+        payload[event.target.name] = event.target.value
+      
+        this.props.onFilterChange(payload)
+      }
 render(){
     return(
         <nav className="navbar is-info" style={ {justifyContent: 'center'} }>
   <div className="navbar-item">
     <DateFilter
-      date={ props.filters.dateFrom}
-      icon="fa-sign-in-alt" />
+      date={ this.props.filters.dateFrom}
+      icon="fa-sign-in-alt"
+      name="dateFrom"
+      onDateChange={this.handleDateChange}
+      />
   </div>
   <div className="navbar-item">
     <DateFilter
-      date={ props.filters.dateTo }
-      icon="fa-sign-out-alt" />
+      date={ this.props.filters.dateTo }
+      icon="fa-sign-out-alt"
+      name="dateTo"
+      onDateChange={this.handleDateChange}
+      
+      />
   </div>
   <div className="navbar-item">
     <OptionsFilter
       options={ [ {value: undefined, name: 'Todos los países'}, {value: 'Argentina', name: 'Argentina'}, {value: 'Brasil', name: 'Brasil'}, {value: 'Chile', name: 'Chile'}, {value: 'Uruguay', name: 'Uruguay'} ] }
-      selected={ props.filters.country }
+      selected={ this.props.filters.country }
+      name="country"
+      onOptionChange={this.handleOptionChange}
       icon="fa-globe" />
   </div>
   <div className="navbar-item">
     <OptionsFilter
       options={ [ {value: undefined, name: 'Cualquier precio'}, {value: 1, name: '$'}, {value: 2, name: '$$'}, {value: 3, name: '$$$'}, {value: 4, name: '$$$$'} ] }
-      selected={ props.filters.price }
+      selected={ this.props.filters.price }
+      onOptionChange={this.handleOptionChange}
       icon="fa-dollar-sign" />
   </div>
   <div className="navbar-item">
     <OptionsFilter
       options={ [ {value: undefined, name: 'Cualquier tamaño'}, {value: 10, name: 'Hotel pequeño'}, {value: 20, name: 'Hotel mediano'}, {value: 30, name: 'Hotel grande'} ] }
-      selected={ props.filters.rooms }
+      selected={ this.props.filters.rooms }
+      name="country"
+      onOptionChange={this.handleOptionChange}
       icon="fa-bed" />
   </div>
 </nav>
@@ -115,19 +150,19 @@ class App extends React.Component {
             rooms: 0
             }
         }
-
-        this.handleDateChange = this.handleDateChange.bind(this)
+        this.handleFilterChange = this.handleFilterChange.bind(this)
     }
 
-    handleDateChange(event) {
-        let payload = this.props.filters
-        payload[event.target.name] = event.target.value
-      }
+    handleFilterChange(payload) {
+      this.setState({
+        filters: payload
+      })
+    }
     render(){
         return (
             <div>
                 <Hero filters={this.state.filters} />
-                <Filters filters={this.state.filters} />
+                <Filters filters={this.state.filters} onFilterChange={this.handleFilterChange} />
             </div>
         )
     }
