@@ -31,7 +31,7 @@ class DateFilter extends React.Component {
         return(
             <div className="field">
             <div className="control has-icons-left">
-            <input className="input" type="date" onChange={ this.handleDateChange } value={ this.props.date } name={ this.props.name } />
+            <input className="input" type="date" onChange={ this.handleDateChange } placeholder={ (this.props.date).toLocaleDateString() } name={ this.props.name } />
               <span className="icon is-small is-left">
                 <i className={`fas ${this.props.icon}`}></i>
               </span>
@@ -85,7 +85,8 @@ class Filters extends React.Component{
 
       handleDateChange(event) {
         let payload = this.props.filters
-        payload[event.target.name] = event.target.value
+        console.log("the date event", event)
+        payload[event.target.name] = new Date((event.target.value).split("/").join("-"))
       
         this.props.onFilterChange(payload)
       }
