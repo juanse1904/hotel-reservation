@@ -1,5 +1,5 @@
 function Hotel(props){
-  let {name, photo, description, rooms, city, country}= props.hotelData
+  let {name, photo, description, rooms, city, country, price}= props.hotelData
   return(
     <div className="card">
   <div className="card-image">
@@ -26,10 +26,10 @@ function Hotel(props){
       <div className="control">
         <div className="tags">
           <span className="tag is-medium is-info">
-            <i className="fas fa-dollar-sign" style={{margin: '0 .125em'}}></i>
-            <i className="fas fa-dollar-sign" style={{margin: '0 .125em'}}></i>
-            <i className="fas fa-dollar-sign" style={{margin: '0 .125em', opacity: '.25'}}></i>
-            <i className="fas fa-dollar-sign" style={{margin: '0 .125em', opacity: '.25'}}></i>
+            {price>=1?<i className="fas fa-dollar-sign" style={{margin: '0 .125em'}}></i>:<i className="fas fa-dollar-sign" style={{margin: '0 .125em', opacity: '.25'}}></i>}
+            {price>=2?<i className="fas fa-dollar-sign" style={{margin: '0 .125em'}}></i>:<i className="fas fa-dollar-sign" style={{margin: '0 .125em', opacity: '.25'}}></i>}
+            {price>=3?<i className="fas fa-dollar-sign" style={{margin: '0 .125em'}}></i>:<i className="fas fa-dollar-sign" style={{margin: '0 .125em', opacity: '.25'}}></i>}
+            {price>=4?<i className="fas fa-dollar-sign" style={{margin: '0 .125em'}}></i>:<i className="fas fa-dollar-sign" style={{margin: '0 .125em', opacity: '.25'}}></i>}
           </span>
         </div>
       </div>
@@ -97,9 +97,9 @@ class OptionsFilter extends React.Component{
           <div className="field">
           <div className="control has-icons-left">
             <div className="select" style={ {width: '100%'} }>
-              <select name={this.props.name} onClick={this.handleOptionChange} style={ {width: '100%'} }>
+              <select name={this.props.name} onChange={this.handleOptionChange} style={ {width: '100%'} }>
                 {this.props.options.map((item,index)=>
-                <option  key={index} value={item.value}>{item.name}</option>
+                <option  key={index}  value={item.value}>{item.name}</option>
                 )}
               </select>
             </div>
@@ -121,6 +121,7 @@ class Filters extends React.Component{
 
       handleOptionChange(event) {
         let payload = this.props.filters
+        console.log("the option event", event)
         payload[event.target.name] = event.target.value
         this.props.onFilterChange(payload)
       }
@@ -165,13 +166,14 @@ render(){
       options={ [ {value: undefined, name: 'Cualquier precio'}, {value: 1, name: '$'}, {value: 2, name: '$$'}, {value: 3, name: '$$$'}, {value: 4, name: '$$$$'} ] }
       selected={ this.props.filters.price }
       onOptionChange={this.handleOptionChange}
+      name="price"
       icon="fa-dollar-sign" />
   </div>
   <div className="navbar-item">
     <OptionsFilter
       options={ [ {value: undefined, name: 'Cualquier tamaño'}, {value: 10, name: 'Hotel pequeño'}, {value: 20, name: 'Hotel mediano'}, {value: 30, name: 'Hotel grande'} ] }
       selected={ this.props.filters.rooms }
-      name="country"
+      name="rooms"
       onOptionChange={this.handleOptionChange}
       icon="fa-bed" />
   </div>
@@ -180,6 +182,38 @@ render(){
 }
 }
 
+class Hotels extends React.Component{
+  constructor(props) {
+    super(props)
+    this.state={
+      hotels:this.myHotels
+    }
+  }
+
+render(){
+  return(
+    <section className="section" style={ {marginTop: '3em'} }>
+  <div className="container">
+    <div className="columns is-multiline">
+      {this.props.hotels.length>0?
+      (this.props.hotels).map(hotel=>(  
+    <div className="column is-one-third">
+      <Hotel hotelData={hotel}/>
+    </div> 
+      )):
+      <article className="message is-warning">
+  <div className="message-body">
+    No se han encontrado hoteles que coincidan con los parámetros de búsqueda.
+  </div>
+</article>
+      }
+      
+    </div>
+  </div>
+</section>
+  )
+}
+}
 class App extends React.Component {
     constructor(props){
         super(props)
@@ -191,22 +225,40 @@ class App extends React.Component {
             country: '',
             price: 0,
             rooms: 0
-            }
+            },
+          hotels:hotelsData
         }
         this.handleFilterChange = this.handleFilterChange.bind(this)
+        this.myHotels = this.myHotels.bind(this)
     }
 
     handleFilterChange(payload) {
       this.setState({
         filters: payload
       })
+      this.myHotels()
+    }
+    myHotels(){
+      console.log("estoy en el filter de hoteles", this.state.filters)
+      let filter=this.state.filters
+      let allHotels=hotelsData
+      let hotelByCountry=filter.country==='Todos los países' || !filter.country?allHotels:allHotels.filter(hotel=>hotel.country===filter.country)
+      let hotelByPrice=filter.price==="Cualquier precio" || !filter.price?hotelByCountry:hotelByCountry.filter(hotel=>hotel.price<=(filter.price)*1)
+      let hotelBySize=filter.rooms==="Cualquier tamaño" || !filter.rooms?hotelByPrice:hotelByPrice.filter(hotel=>hotel.rooms<=(filter.rooms)*1)
+
+      console.log("nuevos hoteles", hotelBySize)
+      this.setState({
+        hotels: hotelBySize
+      })
+      
+      console.log("cambie el de hoteles", this.state.filters)
     }
     render(){
         return (
             <div>
                 <Hero filters={this.state.filters} />
                 <Filters filters={this.state.filters} onFilterChange={this.handleFilterChange} />
-                <Hotel hotelData={hotelsData[1]}/>
+                <Hotels hotels={this.state.hotels} filters={this.state.filters}/>
             </div>
         )
     }
