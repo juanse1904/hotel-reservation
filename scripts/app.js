@@ -231,7 +231,7 @@ class App extends React.Component {
         this.handleFilterChange = this.handleFilterChange.bind(this)
         this.myHotels = this.myHotels.bind(this)
     }
-
+//THIS CODE WAS MADE BY SEBASTIAN GOMEZ MORE INFO: gomeztabaresjuansebastian@gmail.com
     handleFilterChange(payload) {
       this.setState({
         filters: payload
@@ -265,3 +265,7 @@ class App extends React.Component {
   }
   
   ReactDOM.render(<App />, document.getElementById('app'))
+
+
+
+
